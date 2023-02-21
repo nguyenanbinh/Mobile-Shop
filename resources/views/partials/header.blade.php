@@ -16,7 +16,7 @@
                             <i class="fa fa-user-o"></i> My Account( {{ auth()->user()->name }})
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="black-text" href="#">Ifno</a></li>
+                            <li><a class="black-text" href="#">Info</a></li>
                             <li><a class="black-text" href="#">Order</a></li>
                             <li><a class="black-text" href="{{ route('logout') }}" onclick="event.preventDefault();
                             document.getElementById('logout-form').submit();">
@@ -133,7 +133,7 @@
                                 </div>
                                 <div class="cart-btns">
                                     <a href="{{ route('cart') }}">View Cart</a>
-                                    <a href="#">Checkout <i class="fa fa-arrow-circle-right"></i></a>
+                                    <a href="{{ route('checkout') }}">Checkout <i class="fa fa-arrow-circle-right"></i></a>
                                 </div>
                             </div>
                         </div>
