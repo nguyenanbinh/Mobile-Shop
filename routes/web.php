@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\Front\CheckoutController;
 use App\Http\Controllers\Front\HomeController;
 use App\Http\Controllers\Front\ProductController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,16 +22,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
-// Route::get('/', fn() => view('welcome'));
-Route::get('/test', function () {
-    $categories = Category::all();
-    return view('product-detail', compact('categories'));
-});
-Route::get('/test1', function () {
-    $categories = Category::all();
-    return view('product-list', compact('categories'));
-});
 
 Route::get('addToCart/{productID}', function ($productID) {
     $cart = session()->get('cart');
@@ -71,72 +64,43 @@ Route::get('countCart', function() {
     $cartCount = isset($cart) ? count($cart) : 0;
     $altHtml = '<h4>Empty Cart</h4>';
     $html = '';
-    if($cartCount) {
-    foreach ($cart as $key => $value) {
-        $html .= '
-                    <div class="product-widget">
-                        <div class="product-img">
-                            <img src="'. \Illuminate\Support\Facades\Storage::url($cart[$key]['image']).'" alt="">
-                        </div>
-                        <div class="product-body">
-                            <h3 class="product-name"><a href="#">'.$cart[$key]['name'].'</a></h3>
-                            <h4 class="product-price"><span class="qty">1x</span>$'.$cart[$key]['price'].'</h4>
-                        </div>
-                        <button class="delete"><i class="fa fa-close"></i></button>
-                    </div>
-              ';
-    }
-}
+//     if($cartCount) {
+//     foreach ($cart as $key => $value) {
+//         $html .= '
+//                     <div class="product-widget">
+//                         <div class="product-img">
+//                             <img src="'. \Illuminate\Support\Facades\Storage::url($cart[$key]['image']).'" alt="">
+//                         </div>
+//                         <div class="product-body">
+//                             <h3 class="product-name"><a href="#">'.$cart[$key]['name'].'</a></h3>
+//                             <h4 class="product-price"><span class="qty">1x</span>$'.$cart[$key]['price'].'</h4>
+//                         </div>
+//                         <button class="delete"><i class="fa fa-close"></i></button>
+//                     </div>
+//               ';
+//     }
+// }
 
-    $html = $cartCount > 0 ? $html : $altHtml;
+//     $html = $cartCount > 0 ? $html : $altHtml;
     // dd($html);
     return response()->json(['cartCount' => $cartCount, 'listItem' => $html]);
 });
 
-Route::get('checkout', function () {
-    return view('checkout');
-})->name('checkout')->middleware('check_empty_cart');
-Route::get('/test4', function () {
-
-    $data = [];
-    // $p = Product::where('category_id',1)->pluck('id');
-    // $path= '/smartphone/Xiaomi/xiaomi-k40-g.jpg';
-
-    // foreach ($p as $k=> $v) {
-    //     if($k == 0) continue;
-    //     if($k < 5) {
-    //         $i = [
-    //             'path' => $path,
-    //             'imageable_id' => $v,
-    //             'imageable_type' => 'App\Models\Product',
-    //             'created_at' => now(),
-    //         ];
-    //     } else {
-    //         $path = '/smartphone/Samsung/Samsung-Galaxy-A53-xanh-thumb-600x600.jpg';
-    //         $i = [
-    //             'path' => $path,
-    //             'imageable_id' => $v,
-    //             'imageable_type' => 'App\Models\Product',
-    //             'created_at' => now(),
-    //         ];
-    //     }
-    //     array_push($data, $i);
-    // }
-    // return view('test.t2', compact('path'));
-    // \App\Models\Image::insert($data);
-})->name('test4');
-
+// Home
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-
+// Authentication
 Route::get('/register', [RegisterController::class, 'create'])->middleware('guest')->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->middleware('guest')->name('register.perform');
 Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('guest')->name('login.perform');
-
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
 // Categories
 
 Route::get('product-list', [ProductController::class, ''])->name('front.product-list');
 Route::get('category/{id}/products', [ProductController::class, 'getProductsByCateID'])->name('front.cate-product-list');
+
+Route::get('checkout', [CheckoutController::class, 'checkout'])->name('checkout')->middleware('check_empty_cart');
+
+Route::get('place-order', [CheckoutController::class, 'placeOrder'])->name('place-order');
