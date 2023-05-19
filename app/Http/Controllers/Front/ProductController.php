@@ -9,9 +9,10 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     public function getProductsByCateID($cateID) {
+        $perPage = 9;
         $cateName = Category::find($cateID)->name;
-        $productList = Category::find($cateID)->products;
-        // dd(session()->get('cart'));
+        $productList = Category::find($cateID)->products()->paginate($perPage);
+
         return view('product-list', compact('productList', 'cateName'));
     }
 

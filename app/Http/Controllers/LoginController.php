@@ -29,6 +29,9 @@ class LoginController extends Controller
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $request->session()->regenerate();
 
+            flash()
+            ->success('Login successfully.')
+            ->flash();
             return redirect()->intended('/');
         }
 
@@ -43,7 +46,9 @@ class LoginController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
+        flash()
+        ->success('Logout successfully.')
+        ->flash();
         return redirect('/login');
     }
 }

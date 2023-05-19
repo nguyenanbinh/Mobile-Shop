@@ -25,27 +25,33 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('addToCart/{productID}', function ($productID) {
     $cart = session()->get('cart');
-    $product = Product::find($productID); //tìm tới  của sản phẩm đó
+    $product = Product::find($productID);
 
     if (isset($cart[$productID])) {
-        $cart[$productID]['quantity']++;//sau khi đã có sản phẩm đó rồi người dùng thêm lần nữa sẽ tự động tăng lên 1 sản phẩm nữa
+        $cart[$productID]['quantity']++;
     } else {
         $cart[$productID] = [
-            'product_id' => $product->id, //lấy id của sản phẩm
-            'name' => $product->name, //tên sản phẩm
-            'price' => $product->price, //giá sản phẩm
-            'image' =>  $product->images->first()->path, //hình ảnh đại diện
-            'quantity' => 1//(Số lượng sản phẩm) số lượng khi kích vào sẽ tự động thêm là 1 sp vào tránh người dùng click nhiều lần
+            'product_id' => $product->id,
+            'name' => $product->name,
+            'price' => $product->price,
+            'image' =>  $product->images->first()->path,
+            'quantity' => 1
         ];
     }
-    session()->put('cart',$cart);
+    $total = 0;
+    if(isset($cart) && count($cart)) {
+        foreach ($cart as $item) {
+            $total += $item['quantity'] * $item['price'];
+        }
+    }
+    session()->put('cart', $cart);
     return response()->json([
         'code' => 200,
         'message' => 'success',
-        'pId' => $productID,
-        'cart' => ($cart),
+        'subTotal' => $total,
         'totalItem' => count($cart) > 0 ? count($cart) : 0
     ], 200);
+
 })->name('addToCart');
 
 Route::get('/cart', function() {
@@ -62,30 +68,31 @@ Route::get('/cart', function() {
 Route::get('countCart', function() {
     $cart = session()->get('cart');
     $cartCount = isset($cart) ? count($cart) : 0;
-    $altHtml = '<h4>Empty Cart</h4>';
     $html = '';
-//     if($cartCount) {
-//     foreach ($cart as $key => $value) {
-//         $html .= '
-//                     <div class="product-widget">
-//                         <div class="product-img">
-//                             <img src="'. \Illuminate\Support\Facades\Storage::url($cart[$key]['image']).'" alt="">
-//                         </div>
-//                         <div class="product-body">
-//                             <h3 class="product-name"><a href="#">'.$cart[$key]['name'].'</a></h3>
-//                             <h4 class="product-price"><span class="qty">1x</span>$'.$cart[$key]['price'].'</h4>
-//                         </div>
-//                         <button class="delete"><i class="fa fa-close"></i></button>
-//                     </div>
-//               ';
-//     }
-// }
-
-//     $html = $cartCount > 0 ? $html : $altHtml;
-    // dd($html);
+    if($cartCount) {
+    foreach ($cart as $value) {
+        $html .= '
+                    <div class="product-widget">
+                        <div class="product-img">
+                            <img src="'. \Illuminate\Support\Facades\Storage::url($value['image']).'" alt="">
+                        </div>
+                        <div class="product-body">
+                            <h3 class="product-name"><a href="#">'.$value['name'].'</a></h3>
+                            <h4 class="product-price"><span class="qty">'.$value['quantity'].'x</span>$'.$value['price'].'</h4>
+                        </div>
+                        <button class="delete"><i class="fa fa-close"></i></button>
+                    </div>
+              ';
+    }
+}
+    // dd($cart);
     return response()->json(['cartCount' => $cartCount, 'listItem' => $html]);
 });
 
+Route::get('/clearCart', function() {
+    session()->forget('cart');
+    return redirect()->back();
+})->name('clearCart');
 // Home
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -98,7 +105,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->
 
 // Categories
 
-Route::get('product-list', [ProductController::class, ''])->name('front.product-list');
+// Route::get('product-list', [ProductController::class, ''])->name('front.product-list');
 Route::get('category/{id}/products', [ProductController::class, 'getProductsByCateID'])->name('front.cate-product-list');
 
 Route::get('checkout', [CheckoutController::class, 'checkout'])->name('checkout')->middleware('check_empty_cart');
