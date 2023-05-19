@@ -1,4 +1,4 @@
-@if (!in_array(Route::currentRouteName(), ['login', 'register','cart','checkout']))
+@if (!in_array(Route::currentRouteName(), ['login', 'register','checkout']))
 
         <!-- NAVIGATION -->
 		<nav id="navigation">

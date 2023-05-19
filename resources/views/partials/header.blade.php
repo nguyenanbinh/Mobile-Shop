@@ -91,45 +91,50 @@
                         <!-- /Wishlist -->
 
                         {{-- Retrieve item from ssession cart--}}
-                        {{-- @php
+                        @php
                         $cart = session()->get('cart');
                         $cartCondion = isset($cart) ? count($cart) : 0;
-                        @endphp --}}
+                        $total = 0;
+                        if(isset($cart) && count($cart)) {
+                            foreach ($cart as $item) {
+                                $total += $item['quantity'] * $item['price'];
+                            }
+                        }
+                        @endphp
+                        {{-- @dd($cart) --}}
                         <!-- Cart -->
                         <div class="dropdown">
                             <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
                                 <i class="fa fa-shopping-cart"></i>
                                 <span>Your Cart</span>
-                                <div class="qty">0</div>
+                                <div class="qty">{{ $cartCondion }}</div>
                             </a>
                             <div class="cart-dropdown">
                                 <div class="cart-list">
+                                    @if (isset($cart) && count($cart))
+                                    @foreach ($cart as $item)
                                     <div class="product-widget">
                                         <div class="product-img">
-                                            <img src="./img/product01.png" alt="">
+                                            <img src="{{ Storage::url($item['image']) }}" alt="">
                                         </div>
                                         <div class="product-body">
-                                            <h3 class="product-name"><a href="#">product name goes here</a></h3>
-                                            <h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
+                                            <h3 class="product-name"><a href="#">{{ $item['name'] }}</a></h3>
+                                            <h4 class="product-price"><span class="qty">{{ $item['quantity'] }}x</span>${{ $item['price'] }}</h4>
                                         </div>
                                         <button class="delete"><i class="fa fa-close"></i></button>
                                     </div>
-                                    <div class="product-widget">
-                                        <div class="product-img">
-                                            <img src="./img/product01.png" alt="">
-                                        </div>
-                                        <div class="product-body">
-                                            <h3 class="product-name"><a href="#">product name goes here</a></h3>
-                                            <h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
-                                        </div>
-                                        <button class="delete"><i class="fa fa-close"></i></button>
-                                    </div>
-                                </div>
+                                    <hr/>
+                                    @endforeach
+                                    @else
+                                        <p class="no-item">{{ __('No item') }}</p>
+                                    @endif
 
+                                </div>
                                 <div class="cart-summary">
                                     {{-- x --}}
-                                    <small>3 Item(s) selected</small>
-                                    <h5>SUBTOTAL: $2940.00</h5>
+                                    <small class="item-count">{{ isset($cart) ? count($cart) : 0 }} Item(s) selected</small>
+                                    <h5 class="subtotal">SUBTOTAL: ${{ $total }}</h5>
+                                    <a href="{{ route('clearCart') }}" class="btn btn-primary">Clear all</a>
                                 </div>
                                 <div class="cart-btns">
                                     <a href="{{ route('cart') }}">View Cart</a>
